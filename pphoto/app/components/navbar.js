@@ -5,12 +5,12 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
+} from "@/components/ui/navigation-menu";
 import Link from "next/link";
 
 const NavBar = () => {
   return (
-    <div className="w-full border-2 rounded-sm">
+    <div className="w-full border-2 rounded-sm sticky top-0 bg-white z-50">
       <NavigationMenu className="ml-10">
         <NavigationMenuList>
           <NavigationMenuItem className="mr-5">
@@ -30,7 +30,7 @@ const NavBar = () => {
         </NavigationMenuList>
       </NavigationMenu>
     </div>
-  )
-}
+  );
+};
 
 export default NavBar;
