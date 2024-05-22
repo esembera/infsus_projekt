@@ -85,7 +85,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container max-w-screen-md mx-auto px-4 py-8">
         <div className="flex space-x-4 mb-4">
           <Input
             type="text"
