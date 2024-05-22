@@ -23,6 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { storage } from '@/firebaseConfig';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 
 const KeyCodes = {
   comma: 188,
@@ -32,31 +34,76 @@ const KeyCodes = {
 const delimiters = [KeyCodes.comma, KeyCodes.enter];
 
 export default function UploadPage () {
+  const [file, setFile] = useState('')
   const [tags, setTags] = useState([]);
-  const [date, setDate] = useState(null);
+  const [date, setDate] = useState('');
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      selectedFile: null,
+      selectedFileUrl: '',
       photoName: "",
       description: "",
       tags: [],
-      photoDate: null,
+      photoDate: '',
       photoType: ""
     }
   })
 
+
+
   const { register, handleSubmit, setValue, getValues } = form;
 
-  const onSubmit = (values) => {
+  const onSubmit = async (values) => {
     console.log(values);
-  }
+    if (file) {
+      const name = file.name;
+      const storageRef = ref(storage, `image/${name}`);
+      
+      try {
+        const snapshot = await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(snapshot.ref);
+        setValue('selectedFileUrl', url);
+        console.log(getValues('selectedFileUrl'));
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('An error occurred while uploading the file.');
+        return; // Exit the function if file upload fails
+      }
+    }
+  
+    try {
+      console.log(getValues())
+      const response = await fetch('/api/pictures', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(getValues()),
+      });
+  
+      if (response.ok) {
+        alert('Data submitted successfully!');
+      } else {
+        const result = await response.json();
+        alert(`Error: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error sending data:', error);
+      alert('An error occurred while submitting the form.');
+    }
+  };
+  
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setValue("selectedFile", file);
-    setValue("photoName", file.name);
+    if (file.size > 10000000) {
+      form.setError("selectedFile", { message: 'File size too large' })
+    } else {
+      console.log(file)
+      setFile(file)
+      setValue("photoName", file.name);
+    }
     setValue("photoDate", file.lastModifiedDate)
   };
 
@@ -108,6 +155,7 @@ export default function UploadPage () {
                     type="text"
                     placeholder="Photo Name"
                     {...register('photoName')}
+                    {...field}
                   />
                 </FormControl>
                 <FormDescription>
@@ -125,7 +173,7 @@ export default function UploadPage () {
                 <FormControl>
                   <Textarea
                     placeholder="Description"
-                    {...register('description')}
+                    {...field}
                   />
                 </FormControl>
                 <FormDescription>
@@ -178,7 +226,7 @@ export default function UploadPage () {
               <FormItem>
                 <FormLabel>Photo type</FormLabel>
                 <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} {...field}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger className="w-[280px]">
                       <SelectValue placeholder="Select photo type" />
                     </SelectTrigger>
