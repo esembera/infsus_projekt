@@ -1,11 +1,20 @@
 "use client";
+// pages/index.js
 import { useState, useEffect } from "react";
 import ImageFeed from "./components/imageFeed";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Home() {
   const [images, setImages] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPhotoType, setSelectedPhotoType] = useState("all");
 
   // Mocked data fetching
   useEffect(() => {
@@ -58,7 +67,7 @@ export default function Home() {
             { id: "2", text: "macro" },
           ],
           photoType: "macro",
-          selectedFile: "https://via.placeholder.com/300", // Lorem Picsum
+          selectedFile: "https://lorempicsum.com/futurama/300/300", // Lorem Picsum
         },
       ];
       setImages(fetchedImages);
@@ -67,21 +76,41 @@ export default function Home() {
     fetchImages();
   }, []);
 
-  // Filter images based on search query
-  const filteredImages = images.filter((image) =>
-    image.photoName.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter images based on search query and selected photo type
+  const filteredImages = images.filter(
+    (image) =>
+      image.photoName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (selectedPhotoType === "all" || image.photoType === selectedPhotoType)
   );
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="container mx-auto px-4 py-8">
-        <Input
-          type="text"
-          placeholder="Search images..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="mb-4"
-        />
+        <div className="flex space-x-4 mb-4">
+          <Input
+            type="text"
+            placeholder="Search images..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1"
+          />
+          <Select
+            onValueChange={setSelectedPhotoType}
+            value={selectedPhotoType}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="portrait">Portrait</SelectItem>
+              <SelectItem value="landscape">Landscape</SelectItem>
+              <SelectItem value="macro">Macro</SelectItem>
+              <SelectItem value="street">Street</SelectItem>
+              <SelectItem value="screenshot">Screenshot</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <ImageFeed images={filteredImages} />
       </div>
     </main>

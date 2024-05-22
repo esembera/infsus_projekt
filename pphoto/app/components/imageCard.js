@@ -3,11 +3,13 @@ import { format } from "date-fns";
 export default function ImageCard({ image }) {
   return (
     <div className="border rounded-lg p-4">
-      <img
-        src={image.selectedFile}
-        alt={image.photoName}
-        className="w-full h-auto mb-4 rounded-lg"
-      />
+      <div className="w-full mb-4 overflow-hidden rounded-lg">
+        <img
+          src={image.selectedFile}
+          alt={image.photoName}
+          className="w-full h-auto"
+        />
+      </div>
       <h2 className="text-xl font-bold">{image.photoName}</h2>
       <p className="text-gray-700">{image.description}</p>
       <p className="text-gray-500 text-sm">
