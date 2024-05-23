@@ -19,21 +19,20 @@ export default function Home() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const response = await fetch('/api/pictures'); // Adjust the path to your GET method
+        const response = await fetch("/api/pictures");
         if (!response.ok) {
-          throw new Error('Failed to fetch images');
+          throw new Error("Failed to fetch images");
         }
         const fetchedImages = await response.json();
         setImages(fetchedImages);
       } catch (error) {
-        console.error('Error fetching images: ', error);
+        console.error("Error fetching images: ", error);
       }
     };
 
     fetchImages();
   }, []);
 
-  // Filter images based on search query and selected photo type
   const filteredImages = images.filter(
     (image) =>
       image.photoName.toLowerCase().includes(searchQuery.toLowerCase()) &&

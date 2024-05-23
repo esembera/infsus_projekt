@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 
 export default function ImageCard({ image }) {
-  // Generate a unique ID based on the photoName and photoDate
-  const uniqueId = `${image.photoName}-${image.photoDate}`;
+  const uniqueId = image.id;
 
   const [likes, setLikes] = useState(image.likes || 0);
   const [liked, setLiked] = useState(false);
@@ -11,7 +10,6 @@ export default function ImageCard({ image }) {
   const [newComment, setNewComment] = useState("");
   const [username, setUsername] = useState("");
 
-  // Use effect to initialize liked status from local storage
   useEffect(() => {
     const storedLiked = localStorage.getItem(`liked-${uniqueId}`);
     if (storedLiked) {
@@ -19,31 +17,57 @@ export default function ImageCard({ image }) {
     }
   }, [uniqueId]);
 
-  // Function to handle like button click
-  const handleLike = () => {
-    if (liked) {
-      setLikes((prevLikes) => prevLikes - 1);
-      // Future Firebase logic to decrease like count will be added here
-    } else {
-      setLikes((prevLikes) => prevLikes + 1);
-      // Future Firebase logic to increase like count will be added here
-    }
+  const handleLike = async () => {
+    const updatedLikes = liked ? likes - 1 : likes + 1;
+    setLikes(updatedLikes);
     setLiked(!liked);
     localStorage.setItem(`liked-${uniqueId}`, JSON.stringify(!liked));
+
+    try {
+      const response = await fetch("/api/pictures/updateLikes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: uniqueId, likes: updatedLikes }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update likes");
+      }
+    } catch (error) {
+      console.error("Error updating likes:", error);
+    }
   };
 
-  // Function to handle adding a new comment
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (newComment.trim() && username.trim()) {
       const comment = {
+        id: Date.now().toString(),
         text: newComment,
         username,
-        date: new Date().toISOString(),
+        timestamp: new Date().toISOString(),
       };
-      setComments([...comments, comment]);
+      const updatedComments = [...comments, comment];
+      setComments(updatedComments);
       setNewComment("");
       setUsername("");
-      // Future Firebase logic to add comment will be added here
+
+      try {
+        const response = await fetch("/api/pictures/addComment", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: uniqueId, comment }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to add comment");
+        }
+      } catch (error) {
+        console.error("Error adding comment:", error);
+      }
     }
   };
 
@@ -65,6 +89,7 @@ export default function ImageCard({ image }) {
       <h2 className="text-xl font-bold">{image.photoName}</h2>
       <p className="text-gray-700">{image.description}</p>
       <p className="text-gray-500 text-sm">
+        {image.username ? `Uploaded by @${image.username} on ` : ""}
         {format(new Date(image.photoDate), "PPP")}
       </p>
       <div className="mt-2">
@@ -95,13 +120,13 @@ export default function ImageCard({ image }) {
       <div className="mt-4">
         <h3 className="text-lg font-bold mb-2">Comments</h3>
         <div className="space-y-2 mb-4">
-          {comments.map((comment, index) => (
-            <div key={index} className="border rounded-lg p-2">
+          {comments.map((comment) => (
+            <div key={comment.id} className="border rounded-lg p-2">
               <p className="text-sm">
                 <strong>{comment.username}:</strong> {comment.text}
               </p>
               <p className="text-xs text-gray-500">
-                {format(new Date(comment.date), "PPP p")}
+                {format(new Date(comment.timestamp), "PPP p")}
               </p>
             </div>
           ))}
