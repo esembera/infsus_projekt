@@ -10,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { db } from "@/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
 
 export default function Home() {
   const [images, setImages] = useState([]);
@@ -21,13 +19,14 @@ export default function Home() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "pictures"));
-        const fetchedImages = querySnapshot.docs.map((doc) => {
-          return { id: doc.id, ...doc.data() };
-        });
+        const response = await fetch('/api/pictures'); // Adjust the path to your GET method
+        if (!response.ok) {
+          throw new Error('Failed to fetch images');
+        }
+        const fetchedImages = await response.json();
         setImages(fetchedImages);
       } catch (error) {
-        console.error("Error fetching images: ", error);
+        console.error('Error fetching images: ', error);
       }
     };
 

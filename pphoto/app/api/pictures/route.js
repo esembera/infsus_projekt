@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 
 export async function POST(req) {
   try {
@@ -26,5 +26,20 @@ export async function POST(req) {
     }
 
     return NextResponse.json({ error: errorMessage }, { status: 400 });
+  }
+}
+
+export async function GET(req) {
+  try {
+    const querySnapshot = await getDocs(collection(db, 'pictures'));
+    const fetchedImages = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return NextResponse.json(fetchedImages, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching images: ', error);
+    return NextResponse.json({ error: 'Error fetching images' }, { status: 500 });
   }
 }

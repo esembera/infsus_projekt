@@ -36,7 +36,9 @@ const delimiters = [KeyCodes.comma, KeyCodes.enter];
 export default function UploadPage () {
   const [file, setFile] = useState('')
   const [tags, setTags] = useState([]);
-  const [date, setDate] = useState('');
+  const [buttonClass, setButtonClass] = useState('')
+  const [pictureUploading, setPictureUploading] = useState(false)
+  const [postInProgress, setPostInProgress] = useState(false)
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -46,7 +48,9 @@ export default function UploadPage () {
       description: "",
       tags: [],
       photoDate: '',
-      photoType: ""
+      photoType: "",
+      likes: 0,
+      comments: []
     }
   })
 
@@ -56,10 +60,12 @@ export default function UploadPage () {
 
   const onSubmit = async (values) => {
     console.log(values);
+    setButtonClass('cursor-not-allowed pointer-events-none opacity-50')
     if (file) {
+      setPictureUploading(true)
       const name = file.name;
       const storageRef = ref(storage, `image/${name}`);
-      
+
       try {
         const snapshot = await uploadBytes(storageRef, file);
         const url = await getDownloadURL(snapshot.ref);
@@ -71,9 +77,9 @@ export default function UploadPage () {
         return; // Exit the function if file upload fails
       }
     }
-  
+    setPictureUploading(false)
+    setPostInProgress(true)
     try {
-      console.log(getValues())
       const response = await fetch('/api/pictures', {
         method: 'POST',
         headers: {
@@ -81,7 +87,7 @@ export default function UploadPage () {
         },
         body: JSON.stringify(getValues()),
       });
-  
+
       if (response.ok) {
         alert('Data submitted successfully!');
       } else {
@@ -92,15 +98,17 @@ export default function UploadPage () {
       console.error('Error sending data:', error);
       alert('An error occurred while submitting the form.');
     }
+    setPostInProgress(false)
+    setButtonClass('')
+    form.reset()
   };
-  
+
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file.size > 10000000) {
       form.setError("selectedFile", { message: 'File size too large' })
     } else {
-      console.log(file)
       setFile(file)
       setValue("photoName", file.name);
     }
@@ -119,14 +127,9 @@ export default function UploadPage () {
     setValue("tags", newTags);
   };
 
-  const handleDateSelect = (selectedDate) => {
-    setDate(selectedDate);
-    setValue("photoDate", selectedDate);
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Upload Photo</h1>
+      <h1 className="text-2xl font-bold mb-4">Upload Picture Form</h1>
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-8'>
           <FormField
@@ -253,7 +256,15 @@ export default function UploadPage () {
               delimiters={delimiters}
             />
           </div> */}
-          <Button type="submit">Submit</Button>
+          <div className='flex w-2/6 justify-center items-center'>
+            <div className='flex-1 max-w-24'>
+              <Button type="submit" className={buttonClass}>Submit</Button>
+            </div>
+            <div className='flex-1'>
+              {pictureUploading && <div className='flex items-center'><div className="spinner border-t-4 border-black-500 border-solid rounded-full w-4 h-4"></div><span className='ml-3'>Image upload in progress...</span></div>}
+              {postInProgress && <div className='flex items-center'><div className="spinner border-t-4 border-black-500 border-solid rounded-full w-4 h-4"></div><span className='ml-3'>Sending data to server...</span></div>}
+            </div>
+          </div>
         </form>
       </Form>
     </div >
