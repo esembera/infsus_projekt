@@ -1,5 +1,6 @@
 import { z } from "zod";
 export const formSchema = z.object({
+  username: z.string().min(3, "Username is required."),
   selectedFileUrl: z.string().optional(),
   photoName: z.string().min(2, "Photo name is required."),
   description: z.string().optional(),

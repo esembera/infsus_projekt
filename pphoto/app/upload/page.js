@@ -44,6 +44,7 @@ export default function UploadPage () {
     resolver: zodResolver(formSchema),
     defaultValues: {
       selectedFileUrl: '',
+      username: "",
       photoName: "",
       description: "",
       tags: [],
@@ -70,12 +71,14 @@ export default function UploadPage () {
         const snapshot = await uploadBytes(storageRef, file);
         const url = await getDownloadURL(snapshot.ref);
         setValue('selectedFileUrl', url);
-        console.log(getValues('selectedFileUrl'));
       } catch (error) {
         console.error('Error uploading file:', error);
         alert('An error occurred while uploading the file.');
         return; // Exit the function if file upload fails
       }
+    } else {
+      form.setError("selectedFile", { message: 'Photo must be selected.' })
+      return
     }
     setPictureUploading(false)
     setPostInProgress(true)
@@ -147,32 +150,54 @@ export default function UploadPage () {
                 <FormMessage />
               </FormItem>
             )} />
-          <FormField
-            control={form.control}
-            name="photoName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="Photo Name"
-                    {...register('photoName')}
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>
-                  Use this input field to add a name of the photo
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )} />
+          <div className='flex justify-between'>
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem className="flex flex-col w-1/4">
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Username"
+                      {...register('username')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Use this input field to add your username
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            <FormField
+              control={form.control}
+              name="photoName"
+              render={({ field }) => (
+                <FormItem className="flex flex-col w-4/6">
+                  <FormLabel>Photo Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Photo Name"
+                      {...register('photoName')}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Use this input field to add a name of the photo
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )} />
+          </div>
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>Photo Description</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Description"
@@ -185,77 +210,79 @@ export default function UploadPage () {
                 <FormMessage />
               </FormItem>
             )} />
-          <FormField
-            control={form.control}
-            name="photoDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[240px] pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                        {...register('photoDate')}
-                      >
-                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>
-                  Use this input field to select date when picture was taken
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )} />
-          <FormField
-            control={form.control}
-            name="photoType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Photo type</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger className="w-[280px]">
-                      <SelectValue placeholder="Select photo type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="portrait">Portrait</SelectItem>
-                      <SelectItem value="landscape">Landscape</SelectItem>
-                      <SelectItem value="macro">Macro</SelectItem>
-                      <SelectItem value="street">Street</SelectItem>
-                      <SelectItem value="screenshot">Screenshot</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormDescription>
-                  Use this input field to select type of the photo that is uploaded
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )} />
-          {/* <div className="mb-4">
+          <div className='flex justify-between'>
+            <FormField
+              control={form.control}
+              name="photoDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col w-1/2">
+                  <FormLabel>Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[240px] pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          {...register('photoDate')}
+                        >
+                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormDescription>
+                    Use this input field to select date when picture was taken
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            <FormField
+              control={form.control}
+              name="photoType"
+              render={({ field }) => (
+                <FormItem className="flex flex-col w-1/2">
+                  <FormLabel>Photo type</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <SelectTrigger className="w-[280px]">
+                        <SelectValue placeholder="Select photo type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="portrait">Portrait</SelectItem>
+                        <SelectItem value="landscape">Landscape</SelectItem>
+                        <SelectItem value="macro">Macro</SelectItem>
+                        <SelectItem value="street">Street</SelectItem>
+                        <SelectItem value="screenshot">Screenshot</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormDescription>
+                    Use this input field to select type of the photo that is uploaded
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            {/* <div className="mb-4">
             <ReactTags
-              tags={tags}
-              handleDelete={handleDelete}
-              handleAddition={handleAddition}
-              delimiters={delimiters}
+            tags={tags}
+            handleDelete={handleDelete}
+            handleAddition={handleAddition}
+            delimiters={delimiters}
             />
           </div> */}
+          </div>
           <div className='flex w-2/6 justify-center items-center'>
             <div className='flex-1 max-w-24'>
               <Button type="submit" className={buttonClass}>Submit</Button>
