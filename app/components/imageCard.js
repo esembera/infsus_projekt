@@ -89,7 +89,7 @@ export default function ImageCard({ image }) {
       <h2 className="text-2xl font-bold mb-2">{image.photoName}</h2>
       <p className="text-gray-700 mb-2">{image.description}</p>
       <p className="text-gray-500 text-sm mb-2">
-        {image.username ? `Uploaded by @${image.username} on ` : ""}
+        {image.username ? `Photographed by @${image.username} on ` : ""}
         {format(new Date(image.photoDate), "PPP")}
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
