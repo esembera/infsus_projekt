@@ -1,5 +1,4 @@
 "use client";
-// pages/index.js
 import { useState, useEffect } from "react";
 import ImageFeed from "./components/imageFeed";
 import { Input } from "@/components/ui/input";
