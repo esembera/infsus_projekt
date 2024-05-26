@@ -1,5 +1,5 @@
 import { handleUpdateLikes } from "../../../controllers/picturesController";
 
-export async function POST(req) {
+export async function PATCH(req) {
   return handleUpdateLikes(req);
 }
