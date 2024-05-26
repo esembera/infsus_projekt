@@ -9,14 +9,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Loader from "./components/loader";
 
-export default function Home() {
+export default function Home () {
   const [images, setImages] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPhotoType, setSelectedPhotoType] = useState("all");
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchImages = async () => {
+      setIsLoading(true)
       try {
         const response = await fetch("/api/pictures");
         if (!response.ok) {
@@ -27,6 +30,7 @@ export default function Home() {
       } catch (error) {
         console.error("Error fetching images: ", error);
       }
+      setIsLoading(false)
     };
 
     fetchImages();
@@ -69,7 +73,13 @@ export default function Home() {
             </SelectContent>
           </Select>
         </div>
-        <ImageFeed images={filteredImages} />
+        {isLoading ?
+          <div className="flex justify-center mt-16">
+            <Loader size="big" />
+          </div>
+          :
+          <ImageFeed images={filteredImages} />
+        }
       </div>
     </main>
   );

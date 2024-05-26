@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
 
 export default function ImageCard({ image }) {
   const uniqueId = image.id;
@@ -73,7 +75,7 @@ export default function ImageCard({ image }) {
 
   return (
     <div className="border rounded-lg p-4 bg-white shadow-sm">
-      <div className="w-full mb-4 overflow-hidden rounded-lg">
+      <div className="relative w-full mb-4 overflow-hidden rounded-lg">
         {image.selectedFileUrl ? (
           <img
             src={image.selectedFileUrl}
@@ -85,6 +87,14 @@ export default function ImageCard({ image }) {
             <span className="text-gray-500">No image available</span>
           </div>
         )}
+        <a
+          href={image.selectedFileUrl}
+          target="_blank"
+          download
+          className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-lg download-button"
+        >
+          <FontAwesomeIcon icon={faDownload} />
+        </a>
       </div>
       <h2 className="text-2xl font-bold mb-2">{image.photoName}</h2>
       <p className="text-gray-700 mb-2">{image.description}</p>

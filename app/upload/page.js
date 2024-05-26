@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form"
 import { storage } from '@/firebaseConfig';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import Loader from '../components/loader';
 
 const KeyCodes = {
   comma: 188,
@@ -288,8 +289,8 @@ export default function UploadPage () {
               <Button type="submit" className={buttonClass}>Submit</Button>
             </div>
             <div className='flex-1'>
-              {pictureUploading && <div className='flex items-center'><div className="spinner border-t-4 border-black-500 border-solid rounded-full w-4 h-4"></div><span className='ml-3'>Image upload in progress...</span></div>}
-              {postInProgress && <div className='flex items-center'><div className="spinner border-t-4 border-black-500 border-solid rounded-full w-4 h-4"></div><span className='ml-3'>Sending data to server...</span></div>}
+              {pictureUploading && <div className='flex items-center'><Loader size="small"/><span className='ml-3'>Image upload in progress...</span></div>}
+              {postInProgress && <div className='flex items-center'><Loader size="small"/><span className='ml-3'>Sending data to server...</span></div>}
             </div>
           </div>
         </form>
