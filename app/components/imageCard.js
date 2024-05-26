@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 export default function ImageCard({ image }) {
   const uniqueId = image.id;
@@ -26,7 +26,7 @@ export default function ImageCard({ image }) {
     localStorage.setItem(`liked-${uniqueId}`, JSON.stringify(!liked));
 
     try {
-      const response = await fetch("/api/pictures/updateLikes", {
+      const response = await fetch("/api/pictures/likes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export default function ImageCard({ image }) {
       setUsername("");
 
       try {
-        const response = await fetch("/api/pictures/addComment", {
+        const response = await fetch("/api/pictures/comments", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -70,6 +70,26 @@ export default function ImageCard({ image }) {
       } catch (error) {
         console.error("Error adding comment:", error);
       }
+    }
+  };
+
+  const handleDeleteComment = async (cId) => {
+    try {
+      const response = await fetch("/api/pictures/comments", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ docId: uniqueId, commentId: cId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete comment");
+      }
+
+      setComments(comments.filter((comment) => comment.id !== cId));
+    } catch (error) {
+      console.error("Error deleting comment:", error);
     }
   };
 
@@ -131,13 +151,24 @@ export default function ImageCard({ image }) {
         <h3 className="text-lg font-bold mb-2">Comments</h3>
         <div className="space-y-2 mb-4">
           {comments.map((comment) => (
-            <div key={comment.id} className="border rounded-lg p-2 bg-gray-50">
-              <p className="text-sm">
-                <strong>{comment.username}:</strong> {comment.text}
-              </p>
-              <p className="text-xs text-gray-500">
-                {format(new Date(comment.timestamp), "PPP p")}
-              </p>
+            <div
+              key={comment.id}
+              className="border rounded-lg p-2 bg-gray-50 flex justify-between items-start"
+            >
+              <div>
+                <p className="text-sm">
+                  <strong>{comment.username}:</strong> {comment.text}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {format(new Date(comment.timestamp), "PPP p")}
+                </p>
+              </div>
+              <button
+                onClick={() => handleDeleteComment(comment.id)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
             </div>
           ))}
         </div>

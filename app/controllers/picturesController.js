@@ -4,6 +4,7 @@ import {
   addPicture,
   updateLikes,
   addComment,
+  deleteComment,
 } from "../models/pictureModel";
 
 export async function handleGetPictures(req) {
@@ -71,6 +72,23 @@ export async function handleAddComment(req) {
     console.error("Error adding comment:", error);
     return NextResponse.json(
       { error: "Error adding comment" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function handleDeleteComment(req) {
+  try {
+    const {docId, commentId} = await req.json()
+    await deleteComment(docId, commentId)
+    return NextResponse.json(
+      { success: "Comment deleted successfully!" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error deleting comment: ', error);
+    return NextResponse.json(
+      { error: "Error deleting comment" },
       { status: 500 }
     );
   }

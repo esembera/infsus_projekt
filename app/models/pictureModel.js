@@ -32,3 +32,14 @@ export async function addComment(id, comment) {
   const updatedComments = [...pictureData.comments, comment];
   await updateDoc(docRef, { comments: updatedComments });
 }
+
+export async function deleteComment(id, commentId) {
+  const docRef = doc(db, "pictures", id);
+  const document = await getDoc(docRef);
+  const data = document.data();
+  const arrayField = data.comments;
+  const updatedArray = arrayField.filter(item => item.id !== commentId);
+  await updateDoc(docRef, {
+    comments: updatedArray
+  });
+}
